@@ -27,7 +27,7 @@ model Recipes {
   id          Int      @id @default(autoincrement())
   title       String
   description String[]
-  timestamp   String
+  cooktime    String @default("cooktime")
   image       String   @default("image")
   ingredients String[]
   category    Category @default(food)
