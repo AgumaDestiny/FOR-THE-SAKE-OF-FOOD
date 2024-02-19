@@ -96,14 +96,17 @@ app.post("/api/foodhistory", async (req: Request, res: Response) => {
     console.log(error);
   }
 });
-// app.get("/api/foodhistory", async(req:Request, res:Response)=>{
-//   try{
-//     const { foodName, mealType, foodCategory, cookingMethod, freshness, date,userId } =
-//     req.body;
-//   } catch(){
-
-//   }
-// })
+app.get("/api/foodhistory", async(req:Request, res:Response)=>{
+  try{
+    const result= await prisma.foodhistory.findMany({
+      
+    })
+    console.log(result)
+    return res.json(result)
+  } catch(error){
+console.log(error)
+  }
+})
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
