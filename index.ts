@@ -1,14 +1,17 @@
 import { PrismaClient } from "@prisma/client";
-import express, { Request, Response } from "express";
+import bodyParser from "body-parser";
+import express, { Request, Response, request } from "express";
 const prisma = new PrismaClient();
 const app = express();
-var cors = require('cors')
+var cors = require("cors");
 
 const port = process.env.PORT || 5000;
-
-app.use(cors({
-  origin: "*"
-}))
+app.use(bodyParser.json());
+app.use(
+  cors({
+    origin: "*",
+  })
+);
 
 app.get("/api/all-recipes", async (req: Request, res: Response) => {
   try {
@@ -51,7 +54,7 @@ app.get("/api/drinks", async (req: Request, res: Response) => {
   try {
     const drinks = await prisma.recipes.findMany({
       where: {
-        category:"drinks",
+        category: "drinks",
       },
     });
     res.json(drinks);
@@ -64,7 +67,7 @@ app.get("/api/dessert", async (req: Request, res: Response) => {
   try {
     const dessert = await prisma.recipes.findMany({
       where: {
-        category:"dessert",
+        category: "dessert",
       },
     });
     res.json(dessert);
@@ -73,6 +76,34 @@ app.get("/api/dessert", async (req: Request, res: Response) => {
     res.status(500).json({ error: "Error fetching dessert data" });
   }
 });
+app.post("/api/foodhistory", async (req: Request, res: Response) => {
+  try {
+    const { foodName, mealType, foodCategory, cookingMethod, freshness, date,userId } =
+      req.body;
+    const result = await prisma.foodhistory.create({
+      data: {
+        date,
+        foodName,
+        mealType,
+        foodCategory,
+        cookingMethod,
+        freshness,
+        userId
+      },
+    });
+    return res.status(201).json(result);
+  } catch (error) {
+    console.log(error);
+  }
+});
+// app.get("/api/foodhistory", async(req:Request, res:Response)=>{
+//   try{
+//     const { foodName, mealType, foodCategory, cookingMethod, freshness, date,userId } =
+//     req.body;
+//   } catch(){
+
+//   }
+// })
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });

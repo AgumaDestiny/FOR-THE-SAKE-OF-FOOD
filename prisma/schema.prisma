@@ -24,12 +24,33 @@ enum Category {
 }
 
 model Recipes {
-  id          Int      @id @default(autoincrement())
+  id          Int         @id @default(autoincrement())
   title       String
   description String[]
-  cooktime    String @default("cooktime")
-  image       String   @default("image")
+  cooktime    String      @default("cooktime")
+  image       String      @default("image")
   ingredients String[]
-  category    Category @default(food)
+  category    Category    @default(food)
   recommended String?
+  Favorites   Favorites[]
 }
+
+model Foodhistory {
+  id            Int      @id @default(autoincrement())
+  foodName      String
+  foodCategory  String[]
+  cookingMethod String[]
+  freshness     String
+  mealType      String
+  date          String?
+  userId        String?
+}
+
+model Favorites {
+  id        Int     @id
+  userId    String
+
+  recipesId Int
+  recipe    Recipes @relation(fields: [recipesId], references: [id])
+}
+
