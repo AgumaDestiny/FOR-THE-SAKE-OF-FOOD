@@ -57,4 +57,13 @@ model Favorites {
 model Foodcategory {
   id   Int    @id @default(autoincrement())
   name String
+
+  Foods Foods[]
+}
+
+model Foods {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  foodcategory Foodcategory[]
 }
