@@ -36,8 +36,8 @@ model Recipes {
 }
 
 model Foodhistory {
-  id            Int      @id @default(autoincrement())
-  foodName      String
+  id            Int       @id @default(autoincrement())
+  foodName      String[]
   foodCategory  String[]
   cookingMethod String[]
   freshness     String
@@ -47,10 +47,14 @@ model Foodhistory {
 }
 
 model Favorites {
-  id        Int     @id
-  userId    String
+  id     Int    @id
+  userId String
 
   recipesId Int
   recipe    Recipes @relation(fields: [recipesId], references: [id])
 }
 
+model Foodcategory {
+  id   Int    @id
+  name String
+}
