@@ -78,8 +78,15 @@ app.get("/api/dessert", async (req: Request, res: Response) => {
 });
 app.post("/api/foodhistory", async (req: Request, res: Response) => {
   try {
-    const { foodName, mealType, foodCategory, cookingMethod, freshness, date,userId } =
-      req.body;
+    const {
+      foodName,
+      mealType,
+      foodCategory,
+      cookingMethod,
+      freshness,
+      date,
+      userId,
+    } = req.body;
     const result = await prisma.foodhistory.create({
       data: {
         date,
@@ -88,7 +95,7 @@ app.post("/api/foodhistory", async (req: Request, res: Response) => {
         foodCategory,
         cookingMethod,
         freshness,
-        userId
+        userId,
       },
     });
     return res.status(201).json(result);
@@ -96,17 +103,46 @@ app.post("/api/foodhistory", async (req: Request, res: Response) => {
     console.log(error);
   }
 });
-app.get("/api/foodhistory", async(req:Request, res:Response)=>{
-  try{
-    const result= await prisma.foodhistory.findMany({
-      
-    })
-    console.log(result)
-    return res.json(result)
-  } catch(error){
-console.log(error)
+app.get("/api/foodhistory", async (req: Request, res: Response) => {
+  try {
+    const result = await prisma.foodhistory.findMany({});
+    console.log(result);
+    return res.json(result);
+  } catch (error) {
+    console.log(error);
   }
-})
+});
+app.post("/api/favorites", async (req: Request, res: Response) => {
+  try {
+    const { recipesId, userId } = req.body;
+    const result = await prisma.favorites.create({
+      data: {
+        userId: userId,
+        recipe: {
+          connect: {
+            id: recipesId,
+          },
+        },
+      },
+    });
+    return res.status(201).json(result);
+  } catch (error) {
+    console.log(error);
+  }
+});
+app.delete("/api/favorites", async (req: Request, res: Response) => {
+  try {
+    const { recipesId, userId } = req.body;
+    // const result = await prisma.favorites.delete({
+    //   where: {
+    //     AND: [{ userId: userId }, { recipesId: recipesId }],
+    //   },
+    // });
+    // return res.status(201).json(result);
+  } catch (error) {
+    console.log(error);
+  }
+});
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });

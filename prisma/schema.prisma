@@ -47,7 +47,7 @@ model Foodhistory {
 }
 
 model Favorites {
-  id     Int    @id
+  id     Int    @id @default(autoincrement())
   userId String
 
   recipesId Int
