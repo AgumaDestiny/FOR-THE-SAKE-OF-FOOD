@@ -23,6 +23,13 @@ enum Category {
   drinks
 }
 
+enum Condition {
+  diabetes
+  highbloodpressure
+  highcholesterollevels
+  general
+}
+
 model Recipes {
   id          Int         @id @default(autoincrement())
   title       String
@@ -31,14 +38,14 @@ model Recipes {
   image       String      @default("image")
   ingredients String[]
   category    Category    @default(food)
+  condtion    Condition   @default(general)
   recommended String?
   Favorites   Favorites[]
 }
 
 model Foodhistory {
   id            Int       @id @default(autoincrement())
-  foodName      String[]
-  foodCategory  String[]
+  foods         Foods[]
   cookingMethod String[]
   freshness     String
   mealType      String
@@ -65,5 +72,30 @@ model Foods {
   id   Int    @id @default(autoincrement())
   name String
 
-  foodcategory Foodcategory[]
+  foodcategory  Foodcategory[]
+  Foodhistory   Foodhistory?   @relation(fields: [foodhistoryId], references: [id])
+  foodhistoryId Int?
+}
+
+model Mealplanner {
+  id        Int      @id @default(autoincrement())
+  type      String
+  name      String
+  createdAt DateTime @default(now())
+}
+
+model GroceryItem {
+  id        Int      @id @default(autoincrement())
+  name      String
+  checked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Modal {
+  id     Int    @id @default(autoincrement())
+  age    Int
+  height Int
+  weight Int
+  BMI    Float
+  userId String
 }
