@@ -23,12 +23,7 @@ enum Category {
   drinks
 }
 
-enum Condition {
-  diabetes
-  highbloodpressure
-  highcholesterollevels
-  general
-}
+
 
 model Recipes {
   id          Int         @id @default(autoincrement())
@@ -38,7 +33,7 @@ model Recipes {
   image       String      @default("image")
   ingredients String[]
   category    Category    @default(food)
-  condtion    Condition   @default(general)
+  condtion    String[]
   recommended String?
   Favorites   Favorites[]
 }
@@ -50,7 +45,7 @@ model Foodhistory {
   freshness     String
   mealType      String
   date          DateTime?
-  userId        String?
+  userId        String
 }
 
 model Favorites {

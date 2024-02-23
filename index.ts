@@ -112,8 +112,8 @@ app.post("/api/foodhistory", async (req: Request, res: Response) => {
     // Extracting label and value from the array of objects
     const formattedFoodName = foodName.map((item: { label: string, value: number }) => item.label);
     const formattedCookingMethod = cookingMethod.map((item: { label: string, value: string }) => item.label);
-    console.log(formattedCookingMethod,"cooking method")
-    console.log(formattedFoodName,"foodname")
+    console.log(formattedFoodName,"formattedfoodname")
+    console.log(formattedCookingMethod,"formatted cooking method")
     const result = await prisma.foodhistory.create({
       data: {
         date,
@@ -121,7 +121,7 @@ app.post("/api/foodhistory", async (req: Request, res: Response) => {
         mealType,
         cookingMethod: formattedCookingMethod,
         freshness,
-        userId :userId
+        userId:userId
       },
     });
 console.log(result,"result ends here")
