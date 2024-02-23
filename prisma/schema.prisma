@@ -45,7 +45,7 @@ model Foodhistory {
   freshness     String
   mealType      String
   date          DateTime?
-  userId        String
+  userId        String?
 }
 
 model Favorites {
