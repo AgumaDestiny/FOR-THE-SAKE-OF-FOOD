@@ -23,8 +23,6 @@ enum Category {
   drinks
 }
 
-
-
 model Recipes {
   id          Int         @id @default(autoincrement())
   title       String
@@ -67,9 +65,8 @@ model Foods {
   id   Int    @id @default(autoincrement())
   name String
 
-  foodcategory  Foodcategory[]
-  Foodhistory   Foodhistory?   @relation(fields: [foodhistoryId], references: [id])
-  foodhistoryId Int?
+  foodcategory Foodcategory[]
+  Foodhistory  Foodhistory[]
 }
 
 model Mealplanner {
