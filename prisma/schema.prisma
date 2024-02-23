@@ -23,6 +23,13 @@ enum Category {
   drinks
 }
 
+enum Condition {
+  diabetes
+  highcholesterollevel
+  highbloodpressure
+  general
+}
+
 model Recipes {
   id          Int         @id @default(autoincrement())
   title       String
@@ -31,6 +38,7 @@ model Recipes {
   image       String      @default("image")
   ingredients String[]
   category    Category    @default(food)
+  condition   Condition    @default(general)
   recommended String?
   Favorites   Favorites[]
 }
