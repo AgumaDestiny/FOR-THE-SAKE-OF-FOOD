@@ -42,7 +42,7 @@ model Foodhistory {
   cookingMethod String[]
   freshness     String
   mealType      String
-  date          DateTime?
+  date          String?
   userId        String?
 }
 
