@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Foodhistory, PrismaClient } from "@prisma/client";
 import bodyParser from "body-parser";
 import express, { Request, Response, request } from "express";
 const prisma = new PrismaClient();
@@ -30,7 +30,6 @@ app.get("/api/all-foods", async (req: Request, res: Response) => {
         foodcategory: true,
       },
     });
-
 
     const foodData = foods.map((food) => ({
       label: food.name,
@@ -97,89 +96,114 @@ app.get("/api/dessert", async (req: Request, res: Response) => {
     res.status(500).json({ error: "Error fetching dessert data" });
   }
 });
-//api to post data to food history table
-app.post("/api/foodhistory", async (req: Request, res: Response) => {
+app.get("/api/conditions", async (req: Request, res: Response) => {
+  const {category, condition} = req.query
   try {
-    const {
-      foodName,
-      mealType,
-      cookingMethod,
-      freshness,
-      date,
-      userId,
-    } = req.body;
-    console.log(req.body,"req.body ends here")
-    // Extracting label and value from the array of objects
-    const formattedFoodName = foodName.map((item: { label: string, value: number }) => item.label);
-    const formattedCookingMethod = cookingMethod.map((item: { label: string, value: string }) => item.label);
-    console.log(formattedFoodName,"formattedfoodname")
-    console.log(formattedCookingMethod,"formatted cooking method")
-    const result = await prisma.foodhistory.create({
-      data: {
-        date,
-        foods: { create: formattedFoodName.map((name: string) => ({ name })) },
-        mealType,
-        cookingMethod: formattedCookingMethod,
-        freshness,
-        userId:userId
+    const diabetesRecipes = await prisma.recipes.findMany({
+      where: {
+        
+        category:{
+          equals: category as any
+        },
+        condtion:{
+          has: condition as string
+        }
       },
     });
-console.log(result,"result ends here")
-    return res.status(201).json(result);
+    res.json(diabetesRecipes);
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    console.error("Error fetching conditions data:", error);
+    res.status(500).json({ error: "Error fetching conditions data" });
   }
 });
-//api to get data from foodhistory table
-// app.get("/api/foodhistory", async (req: Request, res: Response) => {
+//api to post data to food history table
+// app.post("/api/foodhistory", async (req: Request, res: Response) => {
 //   try {
-//     const { date } = req.query;
-
-//     if (!date) {
-//       return res.status(400).json({ error: 'Date parameter is required.' });
-//     }
-
-//     const formattedDate = new Date(date);
-
-//     // Fetch data from foodhistory table including related foods and foodcategories
-//     const foodhistoryData: Foodhistory[] = await prisma.foodhistory.findMany({
-//       where: {
-//         date: formattedDate,
-//       },
-//       include: {
+//     const { foodName, mealType, cookingMethod, freshness, date, userId } =
+//       req.body;
+//     // Extracting label and value from the array of objects
+//     const formattedFoodName = foodName.map(
+//       (item: { label: string; value: number }) => item.value
+//     );
+//     const formattedCookingMethod = cookingMethod.map(
+//       (item: { label: string; value: string }) => item.label
+//     );
+//     console.log(formattedFoodName, "formattedfoodname");
+//     console.log(formattedCookingMethod, "formatted cooking method");
+    
+//     const result = await prisma.foodhistory.create({
+//       data: {
+//         date,
 //         foods: {
-//           include: {
-//             foodcategory: true,
-//           },
+//           connect: formattedFoodName.map((foodId) => ({
+//             where: { id: foodId },
+//             create: { name: foodId.toString() } // Assuming food name can be derived from id
+//           })),
 //         },
+//         mealType,
+//         cookingMethod: formattedCookingMethod,
+//         freshness,
+//         userId: userId,
 //       },
 //     });
-
-//     // Organize the data as needed, for example, create a response object
-//     const responseData = foodhistoryData.map((entry) => ({
-//       id: entry.id,
-//       date: entry.date,
-//       mealType: entry.mealType,
-//       cookingMethod: entry.cookingMethod,
-//       freshness: entry.freshness,
-//       userId: entry.userId,
-//       foods: entry.foods.map((food) => ({
-//         id: food.id,
-//         name: food.name,
-//         foodcategories: food.foodcategory.map((category) => ({
-//           id: category.id,
-//           name: category.name,
-//         })),
-//       })),
-//     }));
-
-//     return res.status(200).json(responseData);
+//     console.log(result, "result ends here");
+//     return res.status(201).json(result);
 //   } catch (error) {
 //     console.log(error);
-//     return res.status(500).json({ error: 'Internal Server Error' });
+//     return res.status(500).json({ error: "Internal Server Error" });
 //   }
 // });
+//api to get data from foodhistory table
+app.post("/api/getfoodhistory", async (req: Request, res: Response) => {
+  try {
+    const { date, userId } = req.body;
+    console.log({ date: date });
+
+    if (!date) {
+      return res.status(400).json({ error: "Date parameter is required." });
+    }
+
+    // Fetch data from foodhistory table including related foods and foodcategories
+    const foodhistoryData = await prisma.foodhistory.findMany({
+      where: {
+        date: date,
+        userId: userId as string,
+      },
+      include: {
+        foods: {
+          include: {
+            foodcategory: true,
+          },
+        },
+      },
+    });
+
+    console.log({ foodhistoryData: foodhistoryData });
+
+    // Organize the data as needed, for example, create a response object
+    const responseData = foodhistoryData.map((entry) => ({
+      id: entry.id,
+      date: entry.date,
+      mealType: entry.mealType,
+      cookingMethod: entry.cookingMethod,
+      freshness: entry.freshness,
+      userId: entry.userId,
+      foods: entry.foods.map((food) => ({
+        id: food.id,
+        name: food.name,
+        foodcategories: food.foodcategory.map((category) => ({
+          id: category.id,
+          name: category.name,
+        })),
+      })),
+    }));
+
+    return res.status(200).json(foodhistoryData);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
 //api to get favorites id
 app.get("/api/getfavorites/:userId", async (req: Request, res: Response) => {
@@ -284,30 +308,28 @@ app.get("/api/foods", async (req, res) => {
 //   }
 // });
 
-
 // GET /groceries - Get all grocery items
 
-
-app.get('/api/groceries', async (req: Request, res: Response) => {
+app.get("/api/groceries", async (req: Request, res: Response) => {
   const groceries = await prisma.groceryItem.findMany();
   res.json(groceries);
 });
 
-// POST /groceries -  Add a new grocery item
-app.post('/api/groceries', async (req: Request, res: Response) => {
-  const { name } = req.body;
+// POST /groceries -  Add a new grocery item.....original
+app.post("/api/groceries", async (req: Request, res: Response) => {
+  const { name,userId } = req.body;
   try {
     const newGroceryItem = await prisma.groceryItem.create({
-      data: { name },
+      data: { name ,userId},
     });
     res.status(201).json(newGroceryItem);
   } catch (error) {
-    res.status(400).json({ error: "Error fetching data"  });
+    res.status(400).json({ error: "Error fetching data" });
   }
 });
 
 // PATCH /groceries/:id - Update checked status
-app.patch('/api/groceries/:id', async (req: Request, res: Response) => {
+app.patch("/api/groceries/:id", async (req: Request, res: Response) => {
   const { id } = req.params;
   const { checked } = req.body;
 
@@ -318,12 +340,12 @@ app.patch('/api/groceries/:id', async (req: Request, res: Response) => {
     });
     res.json(updatedGroceryItem);
   } catch (error) {
-    res.status(400).json({ error: "Error fetching data"  });
+    res.status(400).json({ error: "Error fetching data" });
   }
 });
 
 // DELETE /groceries/:id - Delete an item
-app.delete('/api/groceries/:id', async (req, res) => {
+app.delete("/api/groceries/:id", async (req, res) => {
   const { id } = req.params;
   try {
     await prisma.groceryItem.delete({
@@ -331,7 +353,7 @@ app.delete('/api/groceries/:id', async (req, res) => {
     });
     res.status(204).send(); // No content
   } catch (error) {
-    res.status(400).json({ error: "Error fetching data"  });
+    res.status(400).json({ error: "Error fetching data" });
   }
 });
 app.listen(port, () => {

@@ -37,7 +37,7 @@ model Recipes {
 }
 
 model Foodhistory {
-  id            Int       @id @default(autoincrement())
+  id            Int      @id @default(autoincrement())
   foods         Foods[]
   cookingMethod String[]
   freshness     String
@@ -74,6 +74,7 @@ model Mealplanner {
   type      String
   name      String
   createdAt DateTime @default(now())
+  userId String
 }
 
 model GroceryItem {
@@ -81,13 +82,7 @@ model GroceryItem {
   name      String
   checked   Boolean  @default(false)
   createdAt DateTime @default(now())
+  userId    String?
 }
 
-model Modal {
-  id     Int    @id @default(autoincrement())
-  age    Int
-  height Int
-  weight Int
-  BMI    Float
-  userId String
-}
+
