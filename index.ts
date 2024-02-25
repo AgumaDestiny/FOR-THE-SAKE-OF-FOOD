@@ -174,23 +174,7 @@ app.post("/api/getfoodhistory", async (req: Request, res: Response) => {
 
     console.log({ foodhistoryData: foodhistoryData });
 
-    // Organize the data as needed, for example, create a response object
-    // const responseData = foodhistoryData.map((entry) => ({
-    //   id: entry.id,
-    //   date: entry.date,
-    //   mealType: entry.mealType,
-    //   cookingMethod: entry.cookingMethod,
-    //   freshness: entry.freshness,
-    //   userId: entry.userId,
-    //   foods: entry.foods.map((food) => ({
-    //     id: food.id,
-    //     name: food.name,
-    //     foodcategories: food.foodcategory.map((category) => ({
-    //       id: category.id,
-    //       name: category.name,
-    //     })),
-    //   })),
-    // }));
+    
     // Function to flatten the foodcategory arrays for each meal
     const flattenFoodCategories = (meals: typeof foodhistoryData) => {
       const flattenedCategories = meals.flatMap((meal) =>
@@ -231,7 +215,48 @@ app.post("/api/getfoodhistory", async (req: Request, res: Response) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 });
+app.post('/api/foodnamecount', async (req: Request, res: Response) => {
+  try {
+    const { date, userId } = req.body;
 
+    if (!date) {
+      return res.status(400).json({ error: 'Date parameter is required.' });
+    }
+
+    // Fetch data from foodhistory table including related foods
+    const foodhistoryData = await prisma.foodhistory.findMany({
+      where: {
+        date: date,
+        userId: userId as string,
+      },
+      include: {
+        foods: true,
+      },
+    });
+
+    // Flatten the food names array
+    const flattenedFoodNames = foodhistoryData.flatMap((meal) =>
+      meal.foods.map((food) => food.name)
+    );
+
+    // Count the occurrences of each food name
+    const foodNameCount = flattenedFoodNames.reduce((count: any, foodName: any) => {
+      count[foodName] = (count[foodName] || 0) + 1;
+      return count;
+    }, {});
+
+    // Convert food name count into the desired format
+    const foodNameData = Object.entries(foodNameCount).map(([name, value]) => ({
+      name,
+      value,
+    }));
+
+    return res.status(200).json(foodNameData);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 //api to get favorites id
 app.get("/api/getfavorites/:userId", async (req: Request, res: Response) => {
   const userId = req.params.userId;
