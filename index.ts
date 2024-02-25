@@ -12,7 +12,13 @@ app.use(
     origin: "*",
   })
 );
-
+type FoodHistoryInclude = {
+  foods: {
+    select: {
+      cookingMethod: true;
+    };
+  };
+};
 app.get("/api/all-recipes", async (req: Request, res: Response) => {
   try {
     const recipes = await prisma.recipes.findMany();
@@ -125,7 +131,10 @@ app.post("/api/foodhistory", async (req: Request, res: Response) => {
       return { id: item.value };
     });
     const formattedCookingMethod = cookingMethod.map(
-      (item: { label: string; value: string }) => item.label
+      (item: { label: string; value: string }) => ({
+        label: item.label,
+        value: item.value,
+      })
     );
 
     const result = await prisma.foodhistory.create({
@@ -174,7 +183,6 @@ app.post("/api/getfoodhistory", async (req: Request, res: Response) => {
 
     console.log({ foodhistoryData: foodhistoryData });
 
-    
     // Function to flatten the foodcategory arrays for each meal
     const flattenFoodCategories = (meals: typeof foodhistoryData) => {
       const flattenedCategories = meals.flatMap((meal) =>
@@ -208,19 +216,19 @@ app.post("/api/getfoodhistory", async (req: Request, res: Response) => {
     console.log({ categoryCount: categoryCount });
     const chartData = convertToChartData(categoryCount);
     console.log({ chartData: chartData });
-    
+
     return res.status(200).json(chartData);
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 });
-app.post('/api/foodnamecount', async (req: Request, res: Response) => {
+app.post("/api/foodnamecount", async (req: Request, res: Response) => {
   try {
     const { date, userId } = req.body;
 
     if (!date) {
-      return res.status(400).json({ error: 'Date parameter is required.' });
+      return res.status(400).json({ error: "Date parameter is required." });
     }
 
     // Fetch data from foodhistory table including related foods
@@ -240,10 +248,13 @@ app.post('/api/foodnamecount', async (req: Request, res: Response) => {
     );
 
     // Count the occurrences of each food name
-    const foodNameCount = flattenedFoodNames.reduce((count: any, foodName: any) => {
-      count[foodName] = (count[foodName] || 0) + 1;
-      return count;
-    }, {});
+    const foodNameCount = flattenedFoodNames.reduce(
+      (count: any, foodName: any) => {
+        count[foodName] = (count[foodName] || 0) + 1;
+        return count;
+      },
+      {}
+    );
 
     // Convert food name count into the desired format
     const foodNameData = Object.entries(foodNameCount).map(([name, value]) => ({
@@ -254,9 +265,64 @@ app.post('/api/foodnamecount', async (req: Request, res: Response) => {
     return res.status(200).json(foodNameData);
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
+// Add a new endpoint to get cooking method data
+app.post("/api/cookingmethodcount", async (req: Request, res: Response) => {
+  try {
+    const { date, userId } = req.body;
+
+    if (!date) {
+      return res.status(400).json({ error: "Date parameter is required." });
+    }
+
+    // Fetch data from foodhistory table including cooking methods
+    const foodhistoryData = await prisma.foodhistory.findMany({
+      where: {
+        date: date,
+        userId: userId as string,
+      },
+      select: {
+        cookingMethod: true,
+      },
+    });
+
+    // Flatten the cooking method arrays for each meal
+    const flattenedCookingMethods = foodhistoryData.flatMap(
+      (meal) => meal.cookingMethod
+    );
+console.log(flattenedCookingMethods,"first one")
+    // Count the occurrences of each cooking method
+    const cookingMethodCount = flattenedCookingMethods.reduce(
+      (count: any, method: any) => {
+        if (typeof method === "object" && method !== null && "label" in method) {
+          const label = method.label;
+          count[label] = (count[label] || 0) + 1;
+        }
+        return count;
+      },
+      {}
+    );
+console.log(cookingMethodCount,"second one")
+    // Convert cooking method count into the desired format
+    const cookingMethodChartData = Object.entries(cookingMethodCount).map(
+      ([label, count]) => ({
+        name: label,
+        value: count,
+      })
+    );
+console.log(cookingMethodChartData,"third one")
+    return res.status(200).json(cookingMethodChartData);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
+
 //api to get favorites id
 app.get("/api/getfavorites/:userId", async (req: Request, res: Response) => {
   const userId = req.params.userId;
