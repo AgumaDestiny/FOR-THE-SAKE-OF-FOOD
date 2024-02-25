@@ -131,10 +131,7 @@ app.post("/api/foodhistory", async (req: Request, res: Response) => {
       return { id: item.value };
     });
     const formattedCookingMethod = cookingMethod.map(
-      (item: { label: string; value: string }) => ({
-        label: item.label,
-        value: item.value,
-      })
+      (item: { label: string; value: string }) => item.label
     );
 
     const result = await prisma.foodhistory.create({
@@ -293,11 +290,15 @@ app.post("/api/cookingmethodcount", async (req: Request, res: Response) => {
     const flattenedCookingMethods = foodhistoryData.flatMap(
       (meal) => meal.cookingMethod
     );
-console.log(flattenedCookingMethods,"first one")
+    console.log(flattenedCookingMethods, "first one");
     // Count the occurrences of each cooking method
     const cookingMethodCount = flattenedCookingMethods.reduce(
       (count: any, method: any) => {
-        if (typeof method === "object" && method !== null && "label" in method) {
+        if (
+          typeof method === "object" &&
+          method !== null &&
+          "label" in method
+        ) {
           const label = method.label;
           count[label] = (count[label] || 0) + 1;
         }
@@ -305,7 +306,7 @@ console.log(flattenedCookingMethods,"first one")
       },
       {}
     );
-console.log(cookingMethodCount,"second one")
+    console.log(cookingMethodCount, "second one");
     // Convert cooking method count into the desired format
     const cookingMethodChartData = Object.entries(cookingMethodCount).map(
       ([label, count]) => ({
@@ -313,15 +314,13 @@ console.log(cookingMethodCount,"second one")
         value: count,
       })
     );
-console.log(cookingMethodChartData,"third one")
+    console.log(cookingMethodChartData, "third one");
     return res.status(200).json(cookingMethodChartData);
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
-
 
 //api to get favorites id
 app.get("/api/getfavorites/:userId", async (req: Request, res: Response) => {
