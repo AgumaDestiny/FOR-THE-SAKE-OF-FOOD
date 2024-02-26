@@ -286,22 +286,32 @@ app.post("/api/cookingmethodcount", async (req: Request, res: Response) => {
       },
     });
 
-    // Flatten the cooking method arrays for each meal
-    const flattenedCookingMethods = foodhistoryData.flatMap(
-      (meal) => meal.cookingMethod
+    
+    // Flatten the food names array
+    const flattenedCookingMethods = foodhistoryData.flatMap((meal) =>
+      meal.cookingMethod.map((food) => food)
+      
     );
     console.log(flattenedCookingMethods, "first one");
     // Count the occurrences of each cooking method
+    // const cookingMethodCount = flattenedCookingMethods.reduce(
+    //   (count: any, method: any) => {
+    //     if (
+    //       typeof method === "object" &&
+    //       method !== null &&
+    //       "label" in method
+    //     ) {
+    //       const label = method.label;
+    //       count[label] = (count[label] || 0) + 1;
+    //     }
+    //     return count;
+    //   },
+    //   {}
+    // );
+    // Count the occurrences of each food name
     const cookingMethodCount = flattenedCookingMethods.reduce(
-      (count: any, method: any) => {
-        if (
-          typeof method === "object" &&
-          method !== null &&
-          "label" in method
-        ) {
-          const label = method.label;
-          count[label] = (count[label] || 0) + 1;
-        }
+      (count: any, foodName: any) => {
+        count[foodName] = (count[foodName] || 0) + 1;
         return count;
       },
       {}
