@@ -23,6 +23,12 @@ enum Category {
   drinks
 }
 
+enum Meal {
+  breakfast
+  lunch
+  supper
+}
+
 model Recipes {
   id          Int         @id @default(autoincrement())
   title       String
@@ -71,10 +77,12 @@ model Foods {
 
 model Mealplanner {
   id        Int      @id @default(autoincrement())
-  type      String
   name      String
   createdAt DateTime @default(now())
-  userId String
+  userId    String
+  checked   Boolean  @default(false)
+  meal      Meal
+  date      String    
 }
 
 model GroceryItem {
@@ -84,5 +92,3 @@ model GroceryItem {
   createdAt DateTime @default(now())
   userId    String?
 }
-
-

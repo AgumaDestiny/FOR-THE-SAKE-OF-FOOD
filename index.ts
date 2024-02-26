@@ -473,6 +473,38 @@ app.delete("/api/groceries/:id", async (req, res) => {
     res.status(400).json({ error: "Error fetching data" });
   }
 });
+//add data to mealplanner table
+app.post("/api/mealplanner", async (req: Request, res: Response) => {
+  const { meal, name, userId, date } = req.body;
+  try {
+    const mealplannerData = await prisma.mealplanner.create({
+      data: { meal, userId, name, date },
+    });
+    res.status(201).json(mealplannerData);
+  } catch (error) {
+    res.status(400).json({ error: "Error fetching data" });
+  }
+});
+//get data from mealplanner table
+app.get("/api/mealplanner", async (req: Request, res: Response) => {
+  const { userId, date } = req.query;
+  if (!userId) {
+    throw new Error("Please pass in a user Id");
+  }
+  try {
+    const getmealtype = await prisma.mealplanner.findMany({
+      where: {
+        userId: userId as any,
+        date: {
+          equals: date as string,
+        },
+      },
+    });
+    return res.status(201).json(getmealtype);
+  } catch (error) {
+    console.log(error);
+  }
+});
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
